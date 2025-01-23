@@ -89,12 +89,22 @@ export const getLocationById = (req: Request, res: Response): Response => {
 export const createLocation = (req: Request, res: Response): Response => {
   try {
     const { name, region, description } = req.body;
+
     if (!name || !region || !description) {
       return res.status(400).json({ message: 'Invalid input' });
     }
 
-    const newLocation: Location = { ...req.body, id: Date.now().toString() };
+    const newLocation: Location = {
+      id: Date.now().toString(),
+      name,
+      region,
+      description,
+      characters: [],
+      monsters: [],
+    };
+
     locations.push(newLocation);
+
     return res.status(201).json({
       message: 'Location created',
       data: {
@@ -107,6 +117,7 @@ export const createLocation = (req: Request, res: Response): Response => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 export const updateLocation = (req: Request, res: Response): Response => {
   try {

@@ -3,5 +3,5 @@ export interface Monster {
     name: string;
     type: string;
     weakness: string[];
-    locationIds: string[];
+    locationId: string;
   }

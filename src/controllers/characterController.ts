@@ -93,8 +93,23 @@ export const createCharacter = (req: Request, res: Response): Response => {
       return res.status(400).json({ message: 'Invalid input' });
     }
 
-    const newCharacter: Character = { ...req.body, id: Date.now().toString() };
+    const location = locations.find(loc => loc.id === locationId);
+    if (!location) {
+      return res.status(404).json({ message: 'Location not found' });
+    }
+
+    const newCharacter: Character = {
+      id: Date.now().toString(),
+      name,
+      race,
+      profession,
+      age,
+      locationId,
+    };
     characters.push(newCharacter);
+
+    location.characters.push(newCharacter.id);
+
     return res.status(201).json({
       message: 'Character created',
       data: {
@@ -114,7 +129,29 @@ export const updateCharacter = (req: Request, res: Response): Response => {
     if (index === -1) {
       return res.status(404).json({ message: 'Character not found' });
     }
-    characters[index] = { ...characters[index], ...req.body };
+
+    const character = characters[index];
+    const { locationId, ...otherUpdates } = req.body;
+
+    if (locationId && locationId !== character.locationId) {
+      const oldLocation = locations.find(loc => loc.id === character.locationId);
+      if (oldLocation) {
+        oldLocation.characters = oldLocation.characters.filter(id => id !== character.id);
+      }
+
+      const newLocation = locations.find(loc => loc.id === locationId);
+      if (!newLocation) {
+        return res.status(404).json({ message: 'New location not found' });
+      }
+      newLocation.characters.push(character.id);
+    }
+
+    characters[index] = {
+      ...character,
+      ...otherUpdates,
+      locationId: locationId || character.locationId,
+    };
+
     return res.status(200).json({
       message: 'Character updated',
       data: {
@@ -134,7 +171,16 @@ export const deleteCharacter = (req: Request, res: Response): Response => {
     if (index === -1) {
       return res.status(404).json({ message: 'Character not found' });
     }
+
+    const character = characters[index];
+
+    const location = locations.find(loc => loc.id === character.locationId);
+    if (location) {
+      location.characters = location.characters.filter(charId => charId !== character.id);
+    }
+
     characters.splice(index, 1);
+
     return res.status(200).json({ message: 'Character deleted' });
   } catch (error) {
     console.error(error);

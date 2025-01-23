@@ -11,7 +11,7 @@ export const getAllMonsters = (req: Request, res: Response): Response => {
     }
 
     const data = monsters.map(monster => {
-      const monsterLocations = locations.filter(loc => monster.locationIds.includes(loc.id));
+      const monsterLocations = locations.filter(loc => monster.locationId.includes(loc.id));
 
       return {
         id: monster.id,
@@ -45,7 +45,7 @@ export const getMonsterById = (req: Request, res: Response): Response => {
       return res.status(404).json({ message: 'Monster not found' });
     }
 
-    const monsterLocations = locations.filter(loc => monster.locationIds.includes(loc.id));
+    const monsterLocations = locations.filter(loc => monster.locationId.includes(loc.id));
 
     return res.status(200).json({
       message: 'Monster details',
@@ -71,13 +71,27 @@ export const getMonsterById = (req: Request, res: Response): Response => {
 
 export const createMonster = (req: Request, res: Response): Response => {
   try {
-    const { name, type, weakness, locationIds } = req.body;
-    if (!name || !type || !weakness || !locationIds) {
+    const { name, type, weakness, locationId } = req.body;
+    if (!name || !type || !weakness || !locationId) {
       return res.status(400).json({ message: 'Invalid input' });
     }
 
-    const newMonster: Monster = { ...req.body, id: Date.now().toString() };
+    const location = locations.find(loc => loc.id === locationId);
+    if (!location) {
+      return res.status(404).json({ message: 'Location not found' });
+    }
+
+    const newMonster: Monster = {
+      id: Date.now().toString(),
+      name,
+      type,
+      weakness,
+      locationId,
+    };
     monsters.push(newMonster);
+
+    location.monsters.push(newMonster.id);
+
     return res.status(201).json({
       message: 'Monster created',
       data: {
@@ -97,7 +111,29 @@ export const updateMonster = (req: Request, res: Response): Response => {
     if (index === -1) {
       return res.status(404).json({ message: 'Monster not found' });
     }
-    monsters[index] = { ...monsters[index], ...req.body };
+
+    const monster = monsters[index];
+    const { locationId, ...otherUpdates } = req.body;
+
+    if (locationId && locationId !== monster.locationId) {
+      const oldLocation = locations.find(loc => loc.id === monster.locationId);
+      if (oldLocation) {
+        oldLocation.monsters = oldLocation.monsters.filter(id => id !== monster.id);
+      }
+
+      const newLocation = locations.find(loc => loc.id === locationId);
+      if (!newLocation) {
+        return res.status(404).json({ message: 'New location not found' });
+      }
+      newLocation.monsters.push(monster.id);
+    }
+
+    monsters[index] = {
+      ...monster,
+      ...otherUpdates,
+      locationId: locationId || monster.locationId,
+    };
+
     return res.status(200).json({
       message: 'Monster updated',
       data: {
@@ -111,16 +147,27 @@ export const updateMonster = (req: Request, res: Response): Response => {
   }
 };
 
+
 export const deleteMonster = (req: Request, res: Response): Response => {
   try {
     const index = monsters.findIndex(m => m.id === req.params.id);
     if (index === -1) {
       return res.status(404).json({ message: 'Monster not found' });
     }
+
+    const monster = monsters[index];
+
+    const location = locations.find(loc => loc.id === monster.locationId);
+    if (location) {
+      location.monsters = location.monsters.filter(monsterId => monsterId !== monster.id);
+    }
+
     monsters.splice(index, 1);
+
     return res.status(200).json({ message: 'Monster deleted' });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+

@@ -46,6 +46,6 @@ export const sampleMonsters: Monster[] = [
     name: 'Griffin',
     type: 'Hybrid',
     weakness: ['Silver Sword', 'Grapeshot'],
-    locationIds: ['1'],
+    locationId: '1',
   },
 ];
