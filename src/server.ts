@@ -1,6 +1,5 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import { ApolloServer } from 'apollo-server-express';
 import characterRoutes from './routes/characterRoutes';
 import locationRoutes from './routes/locationRoutes';
 import monsterRoutes from './routes/monsterRoutes';
@@ -9,8 +8,6 @@ import { Character } from './models/Character';
 import { Location } from './models/Location';
 import { Monster } from './models/Monster';
 import { setHeaders } from './middleware/setHeaders';
-import typeDefs from './graphql/schema/schema';
-import resolvers from './graphql/resolvers/resolvers';
 
 export const characters: Character[] = [];
 export const locations: Location[] = [];
@@ -20,10 +17,10 @@ const initializeSampleData = () => {
   characters.push(...sampleCharacters);
   locations.push(...sampleLocations);
   monsters.push(...sampleMonsters);
-  console.log('Sample data initialized.');
+  console.log('Sample REST data initialized.');
 };
 
-const startServer = async (): Promise<void> => {
+const startRestServer = (): void => {
   const app: Application = express();
   const PORT = 3000;
 
@@ -46,10 +43,6 @@ const startServer = async (): Promise<void> => {
   app.use('/locations', locationRoutes);
   app.use('/monsters', monsterRoutes);
 
-  const apolloServer = new ApolloServer({ typeDefs, resolvers });
-  await apolloServer.start();
-  apolloServer.applyMiddleware({ app, path: '/graphql' });
-
   initializeSampleData();
 
   app.use((req, res) => {
@@ -62,9 +55,8 @@ const startServer = async (): Promise<void> => {
   });
 
   app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`GraphQL endpoint available at http://localhost:${PORT}/graphql`);
+    console.log(`REST server running on http://localhost:${PORT}`);
   });
 };
 
-startServer().catch(err => console.error('Failed to start server:', err));
+startRestServer();
