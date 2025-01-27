@@ -112,26 +112,15 @@ const characterResolvers = {
         result = applyPagination(result, filter.pagination);
       }
 
-      return result.map((character) => ({
-        ...character,
-        locationDetails: sampleLocations.find((loc) => loc.id === character.locationId) || null,
-      }));
+      return result;
     },
 
     character: (
       _parent: never,
       { id }: { id: string },
       _info: GraphQLResolveInfo
-    ): Character & { locationDetails: Location | null } | null => {
-      const character = sampleCharacters.find((char) => char.id === id);
-      if (!character) return null;
-
-      const location = sampleLocations.find((loc) => loc.id === character.locationId);
-
-      return {
-        ...character,
-        locationDetails: location || null,
-      };
+    ): Character | null => {
+      return sampleCharacters.find((char) => char.id === id) || null;
     },
   },
 
@@ -203,6 +192,12 @@ const characterResolvers = {
       sampleCharacters.splice(index, 1);
 
       return true;
+    },
+  },
+
+  Character: {
+    location: (character: Character): Location | null => {
+      return sampleLocations.find((loc) => loc.id === character.locationId) || null;
     },
   },
 };

@@ -105,8 +105,8 @@ const typeDefs = gql`
     name: String!
     region: String!
     description: String!
-    characters: [String!] # List of character IDs
-    monsters: [String!] # List of monster IDs
+    characters: [Character!]!
+    monsters: [Monster!]!
   }
 
   type Monster {
@@ -114,7 +114,7 @@ const typeDefs = gql`
     name: String!
     type: String!
     weakness: [String!]!
-    location: [String!]
+    location: Location
   }
 
   type Query {
