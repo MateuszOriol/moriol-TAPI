@@ -3,7 +3,8 @@ import {
   getAllCharacters,
   getCharacterById,
   createCharacter,
-  updateCharacter,
+  updateCharacterPut,
+  updateCharacterPatch,
   deleteCharacter,
 } from '../controllers/characterController';
 
@@ -12,7 +13,8 @@ const router = Router();
 router.get('/', getAllCharacters);
 router.get('/:id', getCharacterById);
 router.post('/', createCharacter);
-router.put('/:id', updateCharacter);
+router.put('/:id', updateCharacterPut);
+router.patch('/:id', updateCharacterPatch);
 router.delete('/:id', deleteCharacter);
 
 export default router;

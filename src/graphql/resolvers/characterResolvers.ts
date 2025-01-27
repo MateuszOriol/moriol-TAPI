@@ -96,25 +96,15 @@ const characterResolvers = {
       _parent: never,
       { filter }: { filter?: CharacterFilterInput },
       _info: GraphQLResolveInfo
-    ): (Character & { location: Location | undefined })[] => {
+    ): Character[] => {
       let result = sampleCharacters;
 
       if (filter) {
         result = sampleCharacters.filter((character) => {
-          if (filter.name && !filterString(character.name, filter.name))
-            return false;
-          if (filter.race && !filterString(character.race, filter.race))
-            return false;
-          if (
-            filter.profession &&
-            !filterString(character.profession, filter.profession)
-          )
-            return false;
-          if (
-            filter.locationId &&
-            !filterString(character.locationId, filter.locationId)
-          )
-            return false;
+          if (filter.name && !filterString(character.name, filter.name)) return false;
+          if (filter.race && !filterString(character.race, filter.race)) return false;
+          if (filter.profession && !filterString(character.profession, filter.profession)) return false;
+          if (filter.locationId && !filterString(character.locationId, filter.locationId)) return false;
           return true;
         });
 
@@ -124,7 +114,7 @@ const characterResolvers = {
 
       return result.map((character) => ({
         ...character,
-        location: sampleLocations.find((loc) => loc.id === character.locationId),
+        locationDetails: sampleLocations.find((loc) => loc.id === character.locationId) || null,
       }));
     },
 
@@ -132,13 +122,15 @@ const characterResolvers = {
       _parent: never,
       { id }: { id: string },
       _info: GraphQLResolveInfo
-    ): Character & { location: Location | undefined } | null => {
+    ): Character & { locationDetails: Location | null } | null => {
       const character = sampleCharacters.find((char) => char.id === id);
       if (!character) return null;
 
+      const location = sampleLocations.find((loc) => loc.id === character.locationId);
+
       return {
         ...character,
-        location: sampleLocations.find((loc) => loc.id === character.locationId),
+        locationDetails: location || null,
       };
     },
   },

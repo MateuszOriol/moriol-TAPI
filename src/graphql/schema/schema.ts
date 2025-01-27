@@ -97,7 +97,7 @@ const typeDefs = gql`
     race: String!
     profession: String!
     age: Int!
-    locationId: String
+    location: Location
   }
 
   type Location {
@@ -114,7 +114,7 @@ const typeDefs = gql`
     name: String!
     type: String!
     weakness: [String!]!
-    locationId: String!
+    location: [String!]
   }
 
   type Query {

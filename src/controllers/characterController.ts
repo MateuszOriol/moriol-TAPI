@@ -123,7 +123,58 @@ export const createCharacter = (req: Request, res: Response): Response => {
   }
 };
 
-export const updateCharacter = (req: Request, res: Response): Response => {
+export const updateCharacterPut = (req: Request, res: Response): Response => {
+  try {
+    const index = characters.findIndex(c => c.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ message: 'Character not found' });
+    }
+
+    const { name, race, profession, age, locationId } = req.body;
+
+    // Validate that all required fields are provided
+    if (!name || !race || !profession || !age || !locationId) {
+      return res.status(400).json({ message: 'All fields are required for PUT' });
+    }
+
+    const character = characters[index];
+
+    if (locationId !== character.locationId) {
+      const oldLocation = locations.find(loc => loc.id === character.locationId);
+      if (oldLocation) {
+        oldLocation.characters = oldLocation.characters.filter(id => id !== character.id);
+      }
+
+      const newLocation = locations.find(loc => loc.id === locationId);
+      if (!newLocation) {
+        return res.status(404).json({ message: 'New location not found' });
+      }
+      newLocation.characters.push(character.id);
+    }
+
+    characters[index] = {
+      id: character.id, // Ensure ID remains unchanged
+      name,
+      race,
+      profession,
+      age,
+      locationId,
+    };
+
+    return res.status(200).json({
+      message: 'Character updated via PUT',
+      data: {
+        ...characters[index],
+        links: generateLinks(characters[index].id, 'characters'),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updateCharacterPatch = (req: Request, res: Response): Response => {
   try {
     const index = characters.findIndex(c => c.id === req.params.id);
     if (index === -1) {
@@ -153,7 +204,7 @@ export const updateCharacter = (req: Request, res: Response): Response => {
     };
 
     return res.status(200).json({
-      message: 'Character updated',
+      message: 'Character updated via PATCH',
       data: {
         ...characters[index],
         links: generateLinks(characters[index].id, 'characters'),
@@ -164,6 +215,7 @@ export const updateCharacter = (req: Request, res: Response): Response => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 export const deleteCharacter = (req: Request, res: Response): Response => {
   try {

@@ -105,7 +105,56 @@ export const createMonster = (req: Request, res: Response): Response => {
   }
 };
 
-export const updateMonster = (req: Request, res: Response): Response => {
+export const updateMonsterPut = (req: Request, res: Response): Response => {
+  try {
+    const index = monsters.findIndex(m => m.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ message: 'Monster not found' });
+    }
+
+    const { name, type, weakness, locationId } = req.body;
+
+    if (!name || !type || !weakness || !locationId) {
+      return res.status(400).json({ message: 'All fields are required for PUT' });
+    }
+
+    const monster = monsters[index];
+
+    if (locationId !== monster.locationId) {
+      const oldLocation = locations.find(loc => loc.id === monster.locationId);
+      if (oldLocation) {
+        oldLocation.monsters = oldLocation.monsters.filter(id => id !== monster.id);
+      }
+
+      const newLocation = locations.find(loc => loc.id === locationId);
+      if (!newLocation) {
+        return res.status(404).json({ message: 'New location not found' });
+      }
+      newLocation.monsters.push(monster.id);
+    }
+
+    monsters[index] = {
+      id: monster.id,
+      name,
+      type,
+      weakness,
+      locationId,
+    };
+
+    return res.status(200).json({
+      message: 'Monster updated via PUT',
+      data: {
+        ...monsters[index],
+        links: generateLinks(monsters[index].id, 'monsters'),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updateMonsterPatch = (req: Request, res: Response): Response => {
   try {
     const index = monsters.findIndex(m => m.id === req.params.id);
     if (index === -1) {
@@ -135,7 +184,7 @@ export const updateMonster = (req: Request, res: Response): Response => {
     };
 
     return res.status(200).json({
-      message: 'Monster updated',
+      message: 'Monster updated via PATCH',
       data: {
         ...monsters[index],
         links: generateLinks(monsters[index].id, 'monsters'),
@@ -146,7 +195,6 @@ export const updateMonster = (req: Request, res: Response): Response => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 export const deleteMonster = (req: Request, res: Response): Response => {
   try {

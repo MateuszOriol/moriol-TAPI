@@ -119,17 +119,48 @@ export const createLocation = (req: Request, res: Response): Response => {
 };
 
 
-export const updateLocation = (req: Request, res: Response): Response => {
+export const updateLocationPut = (req: Request, res: Response): Response => {
   try {
     const index = locations.findIndex(l => l.id === req.params.id);
     if (index === -1) {
       return res.status(404).json({ message: 'Location not found' });
     }
-    locations[index] = { ...locations[index], ...req.body };
+
+    const { name, region, description } = req.body;
+
+    if (!name || !region || !description) {
+      return res.status(400).json({ message: 'All fields are required for PUT' });
+    }
+
+    locations[index] = {
+      ...locations[index],
+      name,
+      region,
+      description,
+    };
+
     return res.status(200).json({
-      message: 'Location updated',
+      message: 'Location updated via PUT',
       data: {
-        ...locations[index],
+        id: locations[index].id,
+        name: locations[index].name,
+        region: locations[index].region,
+        description: locations[index].description,
+        characters: characters
+          .filter(char => char.locationId === locations[index].id)
+          .map(char => ({
+            name: char.name,
+            race: char.race,
+            profession: char.profession,
+            age: char.age,
+          })),
+        monsters: monsters
+          .filter(monster => locations[index].monsters.includes(monster.id))
+          .map(monster => ({
+            name: monster.name,
+            type: monster.type,
+            weakness: monster.weakness,
+          })),
         links: generateLinks(locations[index].id, 'locations'),
       },
     });
@@ -138,6 +169,51 @@ export const updateLocation = (req: Request, res: Response): Response => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const updateLocationPatch = (req: Request, res: Response): Response => {
+  try {
+    const index = locations.findIndex(l => l.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ message: 'Location not found' });
+    }
+
+    const { name, region, description } = req.body;
+
+    if (name) locations[index].name = name;
+    if (region) locations[index].region = region;
+    if (description) locations[index].description = description;
+
+    return res.status(200).json({
+      message: 'Location updated via PATCH',
+      data: {
+        id: locations[index].id,
+        name: locations[index].name,
+        region: locations[index].region,
+        description: locations[index].description,
+        characters: characters
+          .filter(char => char.locationId === locations[index].id)
+          .map(char => ({
+            name: char.name,
+            race: char.race,
+            profession: char.profession,
+            age: char.age,
+          })),
+        monsters: monsters
+          .filter(monster => locations[index].monsters.includes(monster.id))
+          .map(monster => ({
+            name: monster.name,
+            type: monster.type,
+            weakness: monster.weakness,
+          })),
+        links: generateLinks(locations[index].id, 'locations'),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 
 export const deleteLocation = (req: Request, res: Response): Response => {
   try {

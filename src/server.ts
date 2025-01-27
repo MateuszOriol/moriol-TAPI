@@ -42,19 +42,16 @@ const startServer = async (): Promise<void> => {
   app.use(express.json());
   app.use(setHeaders);
 
-  // Rejestracja tras REST API
   app.use('/characters', characterRoutes);
   app.use('/locations', locationRoutes);
   app.use('/monsters', monsterRoutes);
 
-  // Inicjalizacja Apollo Server
   const apolloServer = new ApolloServer({ typeDefs, resolvers });
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, path: '/graphql' });
 
   initializeSampleData();
 
-  // Obsługa błędów
   app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
   });
@@ -64,7 +61,6 @@ const startServer = async (): Promise<void> => {
     res.status(500).json({ message: err.message });
   });
 
-  // Start serwera
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`GraphQL endpoint available at http://localhost:${PORT}/graphql`);
