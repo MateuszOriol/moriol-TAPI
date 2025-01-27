@@ -1,15 +1,11 @@
-import { Character } from '../models/Character';
-import { Location } from '../models/Location';
-import { Monster } from '../models/Monster';
-
-export const sampleCharacters: Character[] = [
+export const sampleCharacters = [
   {
     id: '1',
     name: 'Geralt of Rivia',
     race: 'Human',
     profession: 'Witcher',
     age: 98,
-    locationId: '1',
+    favouriteLocation: '1',
   },
   {
     id: '2',
@@ -17,11 +13,11 @@ export const sampleCharacters: Character[] = [
     race: 'Elf',
     profession: 'Sorceress',
     age: 94,
-    locationId: '2',
+    favouriteLocation: '2',
   },
 ];
 
-export const sampleLocations: Location[] = [
+export const sampleLocations = [
   {
     id: '1',
     name: 'Kaer Morhen',
@@ -40,12 +36,12 @@ export const sampleLocations: Location[] = [
   },
 ];
 
-export const sampleMonsters: Monster[] = [
+export const sampleMonsters = [
   {
     id: '1',
     name: 'Griffin',
     type: 'Hybrid',
     weakness: ['Silver Sword', 'Grapeshot'],
-    locationId: '1',
+    favouriteLocation: '1',
   },
 ];
