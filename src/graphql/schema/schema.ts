@@ -25,6 +25,14 @@ const typeDefs = gql`
     notContains: String
   }
 
+  input NumberFilterInput {
+    eq: Int
+    gt: Int
+    lt: Int
+    gte: Int
+    lte: Int
+  }
+
   input CharacterFilterInput {
     name: StringFilterInput
     race: StringFilterInput

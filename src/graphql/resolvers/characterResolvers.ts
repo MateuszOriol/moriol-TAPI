@@ -10,6 +10,14 @@ interface StringFilterInput {
   notContains?: string;
 }
 
+interface NumberFilterInput {
+  eq?: number;
+  gt?: number;
+  lt?: number;
+  gte?: number;
+  lte?: number;
+}
+
 interface SortInput {
   field: keyof Character;
   order: "ASC" | "DESC";
@@ -24,6 +32,7 @@ interface CharacterFilterInput {
   name?: StringFilterInput;
   race?: StringFilterInput;
   profession?: StringFilterInput;
+  age?: NumberFilterInput;
   locationId?: StringFilterInput;
   sort?: SortInput;
   pagination?: PaginationInput;
@@ -54,6 +63,18 @@ const filterString = (value: string, filter?: StringFilterInput): boolean => {
     return false;
   if (filter.notContains !== undefined && value.includes(filter.notContains))
     return false;
+
+  return true;
+};
+
+const filterNumber = (value: number, filter?: NumberFilterInput): boolean => {
+  if (!filter) return true;
+
+  if (filter.eq !== undefined && value !== filter.eq) return false;
+  if (filter.gt !== undefined && value <= filter.gt) return false;
+  if (filter.lt !== undefined && value >= filter.lt) return false;
+  if (filter.gte !== undefined && value < filter.gte) return false;
+  if (filter.lte !== undefined && value > filter.lte) return false;
 
   return true;
 };
@@ -109,6 +130,8 @@ const characterResolvers = {
             filter.profession &&
             !filterString(character.profession, filter.profession)
           )
+            return false;
+          if (filter.age && !filterNumber(character.age, filter.age))
             return false;
           if (
             filter.locationId &&
