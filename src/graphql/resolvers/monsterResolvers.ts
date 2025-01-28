@@ -186,6 +186,12 @@ const monsterResolvers = {
       return true;
     },
   },
+
+  Monster: {
+    location: (monster: Monster) => {
+      return sampleLocations.find((loc) => loc.id === monster.locationId) || null;
+    },
+  },
 };
 
 export default monsterResolvers;

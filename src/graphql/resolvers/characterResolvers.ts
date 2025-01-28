@@ -10,6 +10,14 @@ interface StringFilterInput {
   notContains?: string;
 }
 
+interface NumberFilterInput {
+  eq?: number;
+  gt?: number;
+  lt?: number;
+  gte?: number;
+  lte?: number;
+}
+
 interface SortInput {
   field: keyof Character;
   order: "ASC" | "DESC";
@@ -24,6 +32,7 @@ interface CharacterFilterInput {
   name?: StringFilterInput;
   race?: StringFilterInput;
   profession?: StringFilterInput;
+  age?: NumberFilterInput;
   locationId?: StringFilterInput;
   sort?: SortInput;
   pagination?: PaginationInput;
@@ -54,6 +63,18 @@ const filterString = (value: string, filter?: StringFilterInput): boolean => {
     return false;
   if (filter.notContains !== undefined && value.includes(filter.notContains))
     return false;
+
+  return true;
+};
+
+const filterNumber = (value: number, filter?: NumberFilterInput): boolean => {
+  if (!filter) return true;
+
+  if (filter.eq !== undefined && value !== filter.eq) return false;
+  if (filter.gt !== undefined && value <= filter.gt) return false;
+  if (filter.lt !== undefined && value >= filter.lt) return false;
+  if (filter.gte !== undefined && value < filter.gte) return false;
+  if (filter.lte !== undefined && value > filter.lte) return false;
 
   return true;
 };
@@ -96,15 +117,27 @@ const characterResolvers = {
       _parent: never,
       { filter }: { filter?: CharacterFilterInput },
       _info: GraphQLResolveInfo
-    ): Character[] => {
+    ): (Character & { location: Location | undefined })[] => {
       let result = sampleCharacters;
 
       if (filter) {
         result = sampleCharacters.filter((character) => {
-          if (filter.name && !filterString(character.name, filter.name)) return false;
-          if (filter.race && !filterString(character.race, filter.race)) return false;
-          if (filter.profession && !filterString(character.profession, filter.profession)) return false;
-          if (filter.locationId && !filterString(character.locationId, filter.locationId)) return false;
+          if (filter.name && !filterString(character.name, filter.name))
+            return false;
+          if (filter.race && !filterString(character.race, filter.race))
+            return false;
+          if (
+            filter.profession &&
+            !filterString(character.profession, filter.profession)
+          )
+            return false;
+          if (filter.age && !filterNumber(character.age, filter.age))
+            return false;
+          if (
+            filter.locationId &&
+            !filterString(character.locationId, filter.locationId)
+          )
+            return false;
           return true;
         });
 
@@ -114,7 +147,7 @@ const characterResolvers = {
 
       return result.map((character) => ({
         ...character,
-        locationDetails: sampleLocations.find((loc) => loc.id === character.locationId) || null,
+        location: sampleLocations.find((loc) => loc.id === character.locationId),
       }));
     },
 
@@ -122,15 +155,13 @@ const characterResolvers = {
       _parent: never,
       { id }: { id: string },
       _info: GraphQLResolveInfo
-    ): Character & { locationDetails: Location | null } | null => {
+    ): Character & { location: Location | undefined } | null => {
       const character = sampleCharacters.find((char) => char.id === id);
       if (!character) return null;
 
-      const location = sampleLocations.find((loc) => loc.id === character.locationId);
-
       return {
         ...character,
-        locationDetails: location || null,
+        location: sampleLocations.find((loc) => loc.id === character.locationId),
       };
     },
   },
@@ -203,6 +234,12 @@ const characterResolvers = {
       sampleCharacters.splice(index, 1);
 
       return true;
+    },
+  },
+
+  Character: {
+    location: (character: Character): Location | undefined => {
+      return sampleLocations.find((loc) => loc.id === character.locationId);
     },
   },
 };

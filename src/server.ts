@@ -8,6 +8,10 @@ import { Character } from './models/Character';
 import { Location } from './models/Location';
 import { Monster } from './models/Monster';
 import { setHeaders } from './middleware/setHeaders';
+import typeDefs from './graphql/schema/schema';
+import resolvers from './graphql/resolvers/resolvers';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 export const characters: Character[] = [];
 export const locations: Location[] = [];
@@ -24,7 +28,7 @@ const startRestServer = (): void => {
   const app: Application = express();
   const PORT = 3000;
 
-  const allowedOrigins = ['http://localhost:3000'];
+  const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
   const corsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       if (!origin || allowedOrigins.includes(origin)) {
@@ -35,9 +39,13 @@ const startRestServer = (): void => {
     },
   };
 
+  const swaggerDocument = YAML.load('./src/docs/openapi.yaml');
+
   app.use(cors(corsOptions));
   app.use(express.json());
   app.use(setHeaders);
+
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   app.use('/characters', characterRoutes);
   app.use('/locations', locationRoutes);
@@ -55,8 +63,10 @@ const startRestServer = (): void => {
   });
 
   app.listen(PORT, () => {
-    console.log(`REST server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`GraphQL endpoint available at http://localhost:${PORT}/graphql`);
+    console.log(`Swagger UI available at http://localhost:${PORT}/docs`);
   });
 };
 
-startRestServer();
+startServer().catch(err => console.error('Failed to start server:', err));

@@ -25,6 +25,14 @@ const typeDefs = gql`
     notContains: String
   }
 
+  input NumberFilterInput {
+    eq: Int
+    gt: Int
+    lt: Int
+    gte: Int
+    lte: Int
+  }
+
   input CharacterFilterInput {
     name: StringFilterInput
     race: StringFilterInput
@@ -105,8 +113,8 @@ const typeDefs = gql`
     name: String!
     region: String!
     description: String!
-    characters: [String!] # List of character IDs
-    monsters: [String!] # List of monster IDs
+    characters: [Character!]!
+    monsters: [Monster!]!
   }
 
   type Monster {
@@ -114,7 +122,7 @@ const typeDefs = gql`
     name: String!
     type: String!
     weakness: [String!]!
-    location: [String!]
+    location: Location
   }
 
   type Query {

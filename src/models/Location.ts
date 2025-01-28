@@ -5,4 +5,4 @@ export interface Location {
     description: string;
     characters: string[];
     monsters: string[];
-  }  
+  }

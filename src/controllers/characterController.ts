@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
 import { Character } from '../models/Character';
 import { Location } from '../models/Location';
-import { Monster } from '../models/Monster';
 import { generateLinks } from '../utils/hateoas';
-import { characters, locations, monsters } from '../server';
+import { characters, locations } from '../server';
 
 export const getAllCharacters = (req: Request, res: Response): Response => {
   try {
@@ -13,9 +12,6 @@ export const getAllCharacters = (req: Request, res: Response): Response => {
 
     const data = characters.map(character => {
       const location = locations.find(loc => loc.id === character.locationId);
-      const locationMonsters = location
-        ? monsters.filter(monster => location.monsters.includes(monster.id))
-        : [];
 
       return {
         ...character,
@@ -25,12 +21,6 @@ export const getAllCharacters = (req: Request, res: Response): Response => {
               name: location.name,
               region: location.region,
               description: location.description,
-              monsters: locationMonsters.map(monster => ({
-                id: monster.id,
-                name: monster.name,
-                type: monster.type,
-                weakness: monster.weakness,
-              })),
             }
           : null,
         links: generateLinks(character.id, 'characters'),
@@ -38,7 +28,7 @@ export const getAllCharacters = (req: Request, res: Response): Response => {
     });
 
     return res.status(200).json({
-      message: 'List of characters with location and monsters',
+      message: 'List of characters with location',
       data,
     });
   } catch (error) {
@@ -55,9 +45,6 @@ export const getCharacterById = (req: Request, res: Response): Response => {
     }
 
     const location = locations.find(loc => loc.id === character.locationId);
-    const locationMonsters = location
-      ? monsters.filter(monster => location.monsters.includes(monster.id))
-      : [];
 
     return res.status(200).json({
       message: 'Character details',
@@ -69,12 +56,6 @@ export const getCharacterById = (req: Request, res: Response): Response => {
               name: location.name,
               region: location.region,
               description: location.description,
-              monsters: locationMonsters.map(monster => ({
-                id: monster.id,
-                name: monster.name,
-                type: monster.type,
-                weakness: monster.weakness,
-              })),
             }
           : null,
         links: generateLinks(character.id, 'characters'),
@@ -215,7 +196,6 @@ export const updateCharacterPatch = (req: Request, res: Response): Response => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 export const deleteCharacter = (req: Request, res: Response): Response => {
   try {

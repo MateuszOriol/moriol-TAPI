@@ -122,42 +122,41 @@ const locationResolvers = {
 
   Mutation: {
     createLocation: (
-        _parent: never,
-        { input }: { input: CreateLocationInput },
-        _info: GraphQLResolveInfo
-      ): Location => {
-        const newLocation: Location = {
-          id: (sampleLocations.length + 1).toString(),
-          name: input.name,
-          region: input.region,
-          description: input.description,
-          characters: [],
-          monsters: [],
-        };
-      
-        sampleLocations.push(newLocation);
-        return newLocation;
-      },
-      
-      updateLocation: (
-        _parent: never,
-        { id, input }: { id: string; input: UpdateLocationInput },
-        _info: GraphQLResolveInfo
-      ): Location | null => {
-        const index = sampleLocations.findIndex((loc) => loc.id === id);
-        if (index === -1) throw new Error("Location not found");
-      
-        const updatedLocation: Location = {
-          ...sampleLocations[index],
-          name: input.name || sampleLocations[index].name,
-          region: input.region || sampleLocations[index].region,
-          description: input.description || sampleLocations[index].description,
-        };
-      
-        sampleLocations[index] = updatedLocation;
-        return updatedLocation;
-      },
-      
+      _parent: never,
+      { input }: { input: CreateLocationInput },
+      _info: GraphQLResolveInfo
+    ): Location => {
+      const newLocation: Location = {
+        id: (sampleLocations.length + 1).toString(),
+        name: input.name,
+        region: input.region,
+        description: input.description,
+        characters: [],
+        monsters: [],
+      };
+
+      sampleLocations.push(newLocation);
+      return newLocation;
+    },
+
+    updateLocation: (
+      _parent: never,
+      { id, input }: { id: string; input: UpdateLocationInput },
+      _info: GraphQLResolveInfo
+    ): Location | null => {
+      const index = sampleLocations.findIndex((loc) => loc.id === id);
+      if (index === -1) throw new Error("Location not found");
+
+      const updatedLocation: Location = {
+        ...sampleLocations[index],
+        name: input.name || sampleLocations[index].name,
+        region: input.region || sampleLocations[index].region,
+        description: input.description || sampleLocations[index].description,
+      };
+
+      sampleLocations[index] = updatedLocation;
+      return updatedLocation;
+    },
 
     deleteLocation: (
       _parent: never,
@@ -169,6 +168,15 @@ const locationResolvers = {
 
       sampleLocations.splice(index, 1);
       return true;
+    },
+  },
+
+  Location: {
+    characters: (location: Location) => {
+      return sampleCharacters.filter((character) => location.characters.includes(character.id));
+    },
+    monsters: (location: Location) => {
+      return sampleMonsters.filter((monster) => location.monsters.includes(monster.id));
     },
   },
 };
