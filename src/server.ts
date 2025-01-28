@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import { ApolloServer } from 'apollo-server-express';
 import characterRoutes from './routes/characterRoutes';
 import locationRoutes from './routes/locationRoutes';
 import monsterRoutes from './routes/monsterRoutes';
@@ -21,10 +22,10 @@ const initializeSampleData = () => {
   characters.push(...sampleCharacters);
   locations.push(...sampleLocations);
   monsters.push(...sampleMonsters);
-  console.log('Sample REST data initialized.');
+  console.log('Sample data initialized.');
 };
 
-const startRestServer = (): void => {
+const startServer = async (): Promise<void> => {
   const app: Application = express();
   const PORT = 3000;
 
@@ -50,6 +51,10 @@ const startRestServer = (): void => {
   app.use('/characters', characterRoutes);
   app.use('/locations', locationRoutes);
   app.use('/monsters', monsterRoutes);
+
+  const apolloServer = new ApolloServer({ typeDefs, resolvers });
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app, path: '/graphql' });
 
   initializeSampleData();
 
