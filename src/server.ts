@@ -11,6 +11,10 @@ import { Monster } from './models/Monster';
 import { setHeaders } from './middleware/setHeaders';
 import typeDefs from './graphql/schema/schema';
 import resolvers from './graphql/resolvers/resolvers';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+const swaggerDocument = YAML.load('./docs/openapi.yaml');
 
 export const characters: Character[] = [];
 export const locations: Location[] = [];
@@ -41,6 +45,7 @@ const startServer = async (): Promise<void> => {
   app.use(cors(corsOptions));
   app.use(express.json());
   app.use(setHeaders);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   app.use('/characters', characterRoutes);
   app.use('/locations', locationRoutes);

@@ -96,15 +96,25 @@ const characterResolvers = {
       _parent: never,
       { filter }: { filter?: CharacterFilterInput },
       _info: GraphQLResolveInfo
-    ): Character[] => {
+    ): (Character & { location: Location | undefined })[] => {
       let result = sampleCharacters;
 
       if (filter) {
         result = sampleCharacters.filter((character) => {
-          if (filter.name && !filterString(character.name, filter.name)) return false;
-          if (filter.race && !filterString(character.race, filter.race)) return false;
-          if (filter.profession && !filterString(character.profession, filter.profession)) return false;
-          if (filter.locationId && !filterString(character.locationId, filter.locationId)) return false;
+          if (filter.name && !filterString(character.name, filter.name))
+            return false;
+          if (filter.race && !filterString(character.race, filter.race))
+            return false;
+          if (
+            filter.profession &&
+            !filterString(character.profession, filter.profession)
+          )
+            return false;
+          if (
+            filter.locationId &&
+            !filterString(character.locationId, filter.locationId)
+          )
+            return false;
           return true;
         });
 
@@ -112,15 +122,24 @@ const characterResolvers = {
         result = applyPagination(result, filter.pagination);
       }
 
-      return result;
+      return result.map((character) => ({
+        ...character,
+        location: sampleLocations.find((loc) => loc.id === character.locationId),
+      }));
     },
 
     character: (
       _parent: never,
       { id }: { id: string },
       _info: GraphQLResolveInfo
-    ): Character | null => {
-      return sampleCharacters.find((char) => char.id === id) || null;
+    ): Character & { location: Location | undefined } | null => {
+      const character = sampleCharacters.find((char) => char.id === id);
+      if (!character) return null;
+
+      return {
+        ...character,
+        location: sampleLocations.find((loc) => loc.id === character.locationId),
+      };
     },
   },
 
@@ -196,8 +215,8 @@ const characterResolvers = {
   },
 
   Character: {
-    location: (character: Character): Location | null => {
-      return sampleLocations.find((loc) => loc.id === character.locationId) || null;
+    location: (character: Character): Location | undefined => {
+      return sampleLocations.find((loc) => loc.id === character.locationId);
     },
   },
 };

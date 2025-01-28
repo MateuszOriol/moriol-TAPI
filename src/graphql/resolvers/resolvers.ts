@@ -13,15 +13,9 @@ const resolvers = {
     ...locationResolvers.Mutation,
     ...monsterResolvers.Mutation,
   },
-  Character: {
-    ...characterResolvers.Character,
-  },
-  Location: {
-    ...locationResolvers.Location,
-  },
-  Monster: {
-    ...monsterResolvers.Monster,
-  },
+  Character: characterResolvers.Character,
+  Location: locationResolvers.Location,
+  Monster: monsterResolvers.Monster,
 };
 
 export default resolvers;
