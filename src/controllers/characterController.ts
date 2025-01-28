@@ -113,7 +113,6 @@ export const updateCharacterPut = (req: Request, res: Response): Response => {
 
     const { name, race, profession, age, locationId } = req.body;
 
-    // Validate that all required fields are provided
     if (!name || !race || !profession || !age || !locationId) {
       return res.status(400).json({ message: 'All fields are required for PUT' });
     }
@@ -134,7 +133,7 @@ export const updateCharacterPut = (req: Request, res: Response): Response => {
     }
 
     characters[index] = {
-      id: character.id, // Ensure ID remains unchanged
+      id: character.id,
       name,
       race,
       profession,
